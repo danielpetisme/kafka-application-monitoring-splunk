@@ -95,6 +95,8 @@ Sub-topology: 0
       <-- KSTREAM-PEEK-0000000009
 ```
 
+Note: To access to all Kafka Metrics, you may need to change the `metrics.recording.level` from `INFO` to `DEBUG`.
+
 ## SimpleConsumer
 A dummy consumer logging the details of every new record coming from `machine-1m-production-performance`.
 

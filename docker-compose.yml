@@ -46,6 +46,7 @@ services:
       APPLICATION_MODE: "ALL"
       APPLICATION_CREATE_TOPICS: "true"
       KAFKA_BOOTSTRAP_SERVERS: "broker1:29092"
+      KAFKA_METRICS_RECORDING_LEVEL: "DEBUG"
     volumes:
       - opt-jolokia:/opt/jolokia
   splunk: 
