@@ -43,6 +43,11 @@ We use [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) as 
 More info: https://www.splunk.com/en_us/blog/it/splunk-metrics-via-telegraf.html
 
 # Sample Application
+Note: To ease the development, you can use the `kafka_cluster.yml` docker-compose file which provide a Kafka Broker and a Zookeeper:
+```
+docker-compose -f kafka_cluster.yml up -d
+```
+
 The `sample-application` is a dummy Java 11 application composed by:
 
 ## SimpleProducer
@@ -92,10 +97,6 @@ Sub-topology: 0
 
 ## SimpleConsumer
 A dummy consumer logging the details of every new record coming from `machine-1m-production-performance`.
-NOTE: To ease the development, you can use the `kafka_cluster.yml` docker-compose file which provide a Kafka Broker and a Zookeeper:
-```
-docker-compose -f kafka_cluster.yml up -d
-```
 
 # Dashboards
 ## Kafka Stream
