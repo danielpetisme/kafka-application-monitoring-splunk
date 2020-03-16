@@ -1,0 +1,18 @@
+---
+- name: Update Splunk HEC token configuration for Telegraf
+  uri:
+    url: "{{ cert_prefix }}://127.0.0.1:{{ splunk.svc_port }}/services/data/inputs/http/splunk_hec_token"
+    method: POST
+    user: "{{ splunk.admin_user }}"
+    password: "{{ splunk.password }}"
+    validate_certs: false
+    body:
+      index: telegraf_metrics #Change the default index for a metric based index
+      indexes: telegraf_metrics
+    body_format: "form-urlencoded"
+    status_code: 200,409
+    timeout: 10
+  register: update_hec_token
+  changed_when: update_hec_token.status == 200
+  when: ('hec' in splunk and 'token' in splunk.hec and splunk.hec.token) or ('hec_token' in splunk and splunk.hec_token)
+  no_log: "{{ hide_password }}"

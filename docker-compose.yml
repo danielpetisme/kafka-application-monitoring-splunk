@@ -1,0 +1,85 @@
+---
+version: '3.1'
+
+services:
+  zookeeper1:
+    image: confluentinc/cp-zookeeper:5.4.1
+    hostname: zookeeper1
+    container_name: zookeeper1
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker1:
+    image: confluentinc/cp-enterprise-kafka:5.4.1
+    hostname: broker1
+    container_name: broker1
+    depends_on:
+      - zookeeper1
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper1:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  jolokia:
+    build: ./jolokia
+    tty: true
+    volumes:
+      - opt-jolokia:/opt/jolokia
+  sample-application:
+    build: ./sample-application
+    hostname: sample-application
+    container_name: sample-application
+    depends_on:
+      - zookeeper1
+      - broker1
+      - jolokia
+    environment:
+      JAVA_OPTS: -javaagent:/opt/jolokia/jolokia-jvm-1.6.2-agent.jar=host=0.0.0.0,port=8778 -Xmx256M -Xms256M
+      APPLICATION_MODE: "ALL"
+      APPLICATION_CREATE_TOPICS: "true"
+      KAFKA_BOOTSTRAP_SERVERS: "broker1:29092"
+    volumes:
+      - opt-jolokia:/opt/jolokia
+  splunk: 
+    image: splunk/splunk
+    hostname: splunk
+    container_name: splunk
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: changeme
+      SPLUNK_ENABLE_LISTEN: 9997
+      SPLUNK_ADD: "tcp 1514, index telegraf_metrics -datatype metric"
+      SPLUNK_HEC_TOKEN: splunk_telegraf_hec_token
+      SPLUNK_ANSIBLE_POST_TASKS: "file:///opt/ansible/update_splunk_hec_token.yml"    
+    volumes:
+      - "./splunk/update_splunk_hec_token.yml:/opt/ansible/update_splunk_hec_token.yml"
+      - "./splunk/telegraf-kafka-kafka-stream.xml:/opt/splunk/etc/apps/search/local/data/ui/views/telegraf-kafka-kafka-stream.xml"
+      - opt-splunk-etc:/opt/splunk/etc
+      - opt-splunk-var:/opt/splunk/var
+    ports:
+      - "8000:8000"
+      - "9997:9997"
+      - "8088:8088"
+      - "1514:1514"
+  telegraf:
+    image: telegraf
+    hostname: telegraf
+    container_name: telegraf
+    depends_on:
+      - sample-application
+      - splunk
+    restart: always
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+volumes:
+  opt-jolokia: {}
+  opt-splunk-etc: {}
+  opt-splunk-var: {}

@@ -1,0 +1,347 @@
+<form theme="light">
+  <label>Kafka Stream - Entity health view</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="dropdown" token="consumer-id" searchWhenChanged="true">
+      <label>Client Id</label>
+      <search>
+        <query>| mcatalog values(client-id) as client-id WHERE metric_name="kafka_streams.stream_metrics.process-rate" AND "index"="telegraf_metrics" | mvexpand client-id</query>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </search>
+      <fieldForLabel>client-id</fieldForLabel>
+      <fieldForValue>client-id</fieldForValue>
+    </input>
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliest>-15m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Skipped Records Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.skipped-records-rate" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">client-id</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Process Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.process-rate" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">client-id</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Process Total</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.process-total" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Process Latency Average (in ms)</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.process-latency-avg" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Commit Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.commit-rate" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">client-id</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Commit Total</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.commit-total" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Commit Latency Average (in ms)</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.commit-latency-avg" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Poll Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.poll-rate" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">client-id</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Poll Total</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.poll-total" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Poll Latency Average (in ms)</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_metrics.poll-latency-avg" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "client-id"
+| timechart avg(_value) as $consumer-id$ agg=max limit=5 useother=false span=10s BY "client-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.size">large</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Forward Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_processor_node_metrics.forward-rate" AND "index"="telegraf_metrics" span=10s client-id=$consumer-id$ BY "processor-node-id"
+| timechart avg(_value) as "Moy" agg=max limit=20 useother=false span=10s BY "processor-node-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">0</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Process Rate Per Second</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_processor_node_metrics.process-rate" AND "index"="telegraf_metrics" span=10s client-id=$consumer-id$ BY "processor-node-id"
+| timechart avg(_value) as "Moy" agg=max limit=20 useother=false span=10s BY "processor-node-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">0</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Process Latency Average (in ns)</title>
+        <search>
+          <query>| mstats avg(_value) prestats=true WHERE metric_name="kafka_streams.stream_processor_node_metrics.process-latency-avg" AND "index"="telegraf_metrics" span=10s AND client-id=$consumer-id$ BY "processor-node-id"
+| timechart avg(_value) as "Moy" agg=max limit=20 useother=false span=10s BY "processor-node-id"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <refresh>30s</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">0</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+  </row>
+</form>
