@@ -36,7 +36,7 @@ Jolokia proposes an HTTP endpoint which receive metric queries and will respond 
 
 On the other hand, Splunk proposes a Http Event Collector (aka. HEC) data input which permits to send securely events or metrics over HTTP via a token. In our current setup, we define an endpoint and configure it to persist the data into a metric index (rather than event) to build awesome dashboards.
 
-We use [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) as go between the applicaton and Splunk. We define in the [./telegraf/telegraf.conf] file the JMX metrics we want to collect (see the `inputs.jolokia2_agent.metric` sections) and the target HEC ouput (see the `outputs.http` section).
+We use [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) as go between the applicaton and Splunk. We define in the ![Telegraf Config](./telegraf/telegraf.conf) file the JMX metrics we want to collect (see the `inputs.jolokia2_agent.metric` sections) and the target HEC ouput (see the `outputs.http` section).
 
 
 
