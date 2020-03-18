@@ -17,12 +17,12 @@ public class SimpleStream implements Runnable {
 
     public static final Logger log = LoggerFactory.getLogger(SimpleStream.class);
 
-    private final KafkaStreams streams;
-    private final TopologyDescription topologyDescription;
+    private Properties streamProperties;
 
     public SimpleStream(Properties properties) {
         Objects.requireNonNull(properties);
-        var streamProperties = new Properties();
+
+        this.streamProperties = new Properties();
         streamProperties.putAll(properties);
 
         // Define if not set
@@ -33,17 +33,17 @@ public class SimpleStream implements Runnable {
         // Fixed properties
         streamProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-
-        var topology = getTopology();
-        this.topologyDescription = topology.describe();
-        this.streams = new KafkaStreams(topology, streamProperties);
     }
 
     private String getMachine(String event) {
-        return event.split("-")[0];
+        return event.split("\\|")[0];
     }
 
-    private Topology getTopology() {
+    public Properties getStreamProperties() {
+        return this.streamProperties;
+    }
+
+    public Topology getTopology() {
         var builder = new StreamsBuilder();
 
         var productionStream = builder.stream(Topics.production, Consumed.with(Serdes.String(), Serdes.String()));
@@ -69,7 +69,11 @@ public class SimpleStream implements Runnable {
     @Override
     public void run() {
         log.info("Starting SimpleStream");
-        log.info(topologyDescription.toString());
+
+        var topology = getTopology();
+        log.info(topology.describe().toString());
+
+        var streams = new KafkaStreams(topology, streamProperties);
 
         // Gracefully close the stream when the application shut down
         // Fixme CountLatch
