@@ -103,3 +103,6 @@ A dummy consumer logging the details of every new record coming from `machine-1m
 # Dashboards
 ## Kafka Stream
 ![Kafka Stream](./images/kafka-stream-monitoring.png)
+
+# Credits
+Based on [Sylvain Le Gouellec](https://github.com/LGouellec) work.
