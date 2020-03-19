@@ -1,5 +1,6 @@
 package com.sample;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
@@ -28,7 +29,12 @@ public class SimpleStream implements Runnable {
         // Define if not set
         streamProperties.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "simple-stream");
         streamProperties.putIfAbsent(StreamsConfig.CLIENT_ID_CONFIG, "simple-stream-client");
+
         streamProperties.putIfAbsent(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1);
+        streamProperties.putIfAbsent(StreamsConfig.STATE_DIR_CONFIG, "/tmp");
+        streamProperties.putIfAbsent(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, 3);
+        streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_RECORDS_CONFIG), 500);
+        streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG), 100);
 
         // Fixed properties
         streamProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -60,7 +66,7 @@ public class SimpleStream implements Runnable {
                 )
                 .toStream()
                 .map((Windowed<String> machine, Long count) -> new KeyValue(machine.key(), count))
-                .peek((machine, fiveMinuteCount) -> log.info("Sending key = {}, value = {}", machine, fiveMinuteCount))
+                .peek((machine, oneMinuteCount) -> log.info("Sending key = {}, value = {}", machine, oneMinuteCount))
                 .to(Topics.machine1mProductionPerformance, Produced.with(Serdes.String(), Serdes.Long()));
 
         return builder.build();

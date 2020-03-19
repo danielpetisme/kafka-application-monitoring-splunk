@@ -21,9 +21,6 @@ public class SimpleStreamTest {
 
     private TestInputTopic<String, String> inputTopic;
     private TestOutputTopic<String, Long> outputTopic;
-    private final Instant recordBaseTime = Instant.now();
-    private final Duration advance1Min = Duration.ofMinutes(1);
-
 
     TopologyTestDriver testDriver;
 
@@ -61,8 +58,9 @@ public class SimpleStreamTest {
                 "Machine#2", 2L
         );
         inputTopic.pipeRecordList(records);
+
         final Map<String, Long> actualMachine1mPerformance = outputTopic.readKeyValuesToMap();
-        
+
         assertThat(actualMachine1mPerformance).isEqualTo(expectedMachine1mPerformance);
     }
 }

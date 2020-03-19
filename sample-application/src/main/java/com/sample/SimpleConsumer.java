@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class SimpleConsumer implements Runnable {
@@ -28,6 +29,7 @@ public class SimpleConsumer implements Runnable {
         // Define if not set
         consumerProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, "simple-consumer");
         consumerProperties.putIfAbsent(ConsumerConfig.CLIENT_ID_CONFIG, "simple-consumer-client");
+        consumerProperties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 20);
 
         // Fixed properties
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -44,6 +46,11 @@ public class SimpleConsumer implements Runnable {
             ConsumerRecords<Integer, Integer> records = kafkaConsumer.poll(Duration.ofMillis(400));
             for (ConsumerRecord<Integer, Integer> record : records) {
                 log.info("Topic: {}, timestamp = {},  offset = {}, key = {}, value = {}", record.topic(), record.timestamp(), record.offset(), record.key(), record.value());
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
