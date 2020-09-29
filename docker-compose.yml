@@ -49,6 +49,8 @@ services:
       KAFKA_METRICS_RECORDING_LEVEL: "DEBUG"
     volumes:
       - opt-jolokia:/opt/jolokia
+    ports:
+      - "8778:8778"
   splunk: 
     image: splunk/splunk
     hostname: splunk

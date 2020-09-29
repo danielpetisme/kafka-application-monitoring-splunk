@@ -10,7 +10,7 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <logger name="org.kafka" level="INFO" additivity="false">
+    <logger name="org.apache.kafka" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
