@@ -1,0 +1,662 @@
+<form>
+  <label>Kafka Producer - Entity health view</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="timerange">
+      <label>Time Range</label>
+      <default>
+        <earliest>-15m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="client-id">
+      <label>Client Id</label>
+      <fieldForLabel>client-id</fieldForLabel>
+      <fieldForValue>client-id</fieldForValue>
+      <search>
+        <query>| mcatalog values(client-id) as client-id WHERE metric_name="kafka_producer_producer_metrics.request-rate" AND "index"="telegraf_metrics" | mvexpand client-id</query>
+        <earliest>$timerange.earliest$</earliest>
+        <latest>$timerange.latest$</latest>
+      </search>
+      <choice value="*">ANY</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="multiselect" token="topic" searchWhenChanged="false">
+      <label>Topic</label>
+      <choice value="*">ANY</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>topic</fieldForLabel>
+      <fieldForValue>topic</fieldForValue>
+      <search>
+        <query>| mcatalog values(topic) as topic WHERE metric_name="kafka_producer_producer_topic_metrics.record-send-total" AND "index"="telegraf_metrics" AND client-id="$client-id$"| mvexpand topic</query>
+        <earliest>$timerange.earliest$</earliest>
+        <latest>$timerange.latest$</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <html>
+        <h1>Throughput</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Outgoing byte per second</title>
+        <search>
+          <query>| mstats 
+    latest(kafka_producer_producer_metrics.outgoing-byte-total) as value
+  WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+  | timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Bytes/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Outgoing byte per second per topic</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_topic_metrics.byte-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by topic span=1m
+| timechart avg(value) span=1m by topic</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Bytes/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Outgoing messages per seccond</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_topic_metrics.record-send-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Messages/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Outgoing messages per second per topic</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_topic_metrics.record-send-total) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by topic span=1m
+| timechart avg(value) span=1m by topic</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Messages/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <h1>Performance</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Batch size</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.batch-size-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Messages/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Compression rate</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.compression-rate-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=round(value*100)
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Record size</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.record-size-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Bytes</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Buffer size available</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.buffer-available-bytes) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Request in fight</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.requests-in-flight) as value
+WHERE "index"="telegraf_metrics" client-id=* by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Request queue time</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.buffer-available-bytes) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <h1>Producer requests metrics</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Produce request latency</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.request-latency-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Seconds</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Produce request size</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.request-size-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=round(value*100)
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Produce request per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.request-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Requests/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Produce response per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.response-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Responses/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <h1>Connections</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Connection count</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.connection-count) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Connections</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Connection creation per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.connection-creation-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=round(value*100)."%"
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Connections created/s</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Connection close per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.connection-close-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Connections closed/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Select per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.select-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>IO ratio</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.io-ratio) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=value * 100 . "%"
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">% time spent doing IO</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>IO wait time avg</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.io-wait-time-ns-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=value / ( 1000 * 1000)
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">ms</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>IO wait ratio</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.io-wait-ratio) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=value * 100 
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">% time spent waiting</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>IO time</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.io-time-ns-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| eval value=value / 1000
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">μs</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <h1>Errors and Retries</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Error per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.record-error-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Errors/s</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Retry per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.record-retry-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Retries/s</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Failed authentication per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.failed-authentication-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Failed auth/s</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Failed reauthentication per second</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.failed-reauthentication-rate) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Failed reauth/s</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <h1>Misc</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Produce request throttle avg</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.produce-throttle-time-avg) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Throttle time</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Metadata max age</title>
+        <search>
+          <query>| mstats 
+  latest(kafka_producer_producer_metrics.metadata-age) as value
+WHERE "index"="telegraf_metrics" client-id=$client-id$ by client-id span=1m
+| timechart avg(value) span=1m by client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">Age in ms</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

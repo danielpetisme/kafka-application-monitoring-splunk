@@ -32,9 +32,9 @@ public class SimpleStream implements Runnable {
 
         streamProperties.putIfAbsent(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1);
         streamProperties.putIfAbsent(StreamsConfig.STATE_DIR_CONFIG, "/tmp");
-        streamProperties.putIfAbsent(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, 3);
-        streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_RECORDS_CONFIG), 500);
-        streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG), 100);
+        // streamProperties.putIfAbsent(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, 3);
+        // streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_RECORDS_CONFIG), 500);
+        // streamProperties.putIfAbsent(StreamsConfig.consumerPrefix(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG), 100);
 
         // Fixed properties
         streamProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());

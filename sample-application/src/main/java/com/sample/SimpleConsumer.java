@@ -29,7 +29,7 @@ public class SimpleConsumer implements Runnable {
         // Define if not set
         consumerProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, "simple-consumer");
         consumerProperties.putIfAbsent(ConsumerConfig.CLIENT_ID_CONFIG, "simple-consumer-client");
-        consumerProperties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 20);
+        // consumerProperties.putIfAbsent(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 20);
 
         // Fixed properties
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

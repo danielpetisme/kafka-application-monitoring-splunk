@@ -1,0 +1,209 @@
+<form>
+    <label>Kafka Consumer - Topic details</label>
+    <fieldset submitButton="false" autoRun="true">
+      <input type="time" token="timerange">
+        <label>Time Range</label>
+        <default>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <input type="dropdown" token="client-id">
+        <label>Client Id</label>
+        <fieldForLabel>client-id</fieldForLabel>
+        <fieldForValue>client-id</fieldForValue>
+        <search>
+          <query>| mcatalog values(client-id) as client-id WHERE metric_name="kafka_consumer_consumer_fetch_manager_metrics.records-lag" AND "index"="telegraf_metrics" | mvexpand client-id</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+      </input>
+      <input type="dropdown" token="topic">
+        <label>Topic</label>
+        <fieldForLabel>topic</fieldForLabel>
+        <fieldForValue>topic</fieldForValue>
+        <search>
+          <query>| mcatalog values(topic) as topic WHERE metric_name="kafka_consumer_consumer_fetch_manager_metrics.records-lag" AND "index"="telegraf_metrics" AND client-id="$client-id$"| mvexpand topic</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+      </input>
+    </fieldset>
+    <row>
+      <panel>
+        <html>
+          <h1>Lag</h1>
+        </html>
+        <input type="dropdown" token="partition" searchWhenChanged="true">
+          <label>Partition</label>
+          <fieldForLabel>partition</fieldForLabel>
+          <fieldForValue>partition</fieldForValue>
+          <search>
+            <query>| mcatalog values(partition) as partition WHERE metric_name="kafka_consumer_consumer_fetch_manager_metrics.records-lag" AND "index"="telegraf_metrics" AND client-id="simple-consumer-client" AND topic="machine-1m-production-performance" | mvexpand partition</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <choice value="*">ANY</choice>
+          <default>*</default>
+          <initialValue>*</initialValue>
+        </input>
+      </panel>
+    </row>
+    <row>
+      <panel>
+        <chart>
+          <title>Lag per partition</title>
+          <search>
+            <query>| mstats 
+    latest(kafka_consumer_consumer_fetch_manager_metrics.records-lag-avg) as value
+  WHERE "index"="telegraf_metrics" AND client-id=$client-id$ AND topic=$topic$ AND partition=$partition$ by partition span=1m
+  |  timechart avg(value) span=1m by partition</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Messages</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.drilldown">none</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+      <panel>
+        <chart>
+          <title>Lead per partition</title>
+          <search>
+            <query>| mstats 
+    latest(kafka_consumer_consumer_fetch_manager_metrics.records-lead-avg) as value
+  WHERE "index"="telegraf_metrics" AND client-id=$client-id$ AND topic=$topic$ AND partition=$partition$ by partition span=1m
+  |  timechart avg(value) span=1m by partition</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Messages</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.drilldown">none</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+    </row>
+    <row>
+      <panel>
+        <html>
+          <h1>
+            Throughput
+          </h1>
+        </html>
+      </panel>
+    </row>
+    <row>
+      <panel>
+        <chart>
+          <title>Incoming bytes consumed per second</title>
+          <search>
+            <query>| mstats 
+    avg(kafka_consumer_consumer_fetch_manager_metrics.bytes-consumed-rate) as value
+  WHERE "index"="telegraf_metrics" client-id=$client-id$ topic=$topic$ span=1m
+  | timechart avg(value) span=1m</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Bytes/s</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.drilldown">none</option>
+          <option name="charting.layout.splitSeries">0</option>
+          <option name="charting.legend.placement">top</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+      <panel>
+        <chart>
+          <title>Incoming messages per second per topic</title>
+          <search>
+            <query>| mstats 
+    latest(kafka_consumer_consumer_fetch_manager_metrics.records-consumed-rate) as value
+  WHERE "index"="telegraf_metrics" client-id=$client-id$ topic=$topic$ span=1m
+  | timechart avg(value) span=1m</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Messages/s</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.drilldown">none</option>
+          <option name="charting.legend.mode">standard</option>
+          <option name="charting.legend.placement">top</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+    </row>
+    <row>
+      <panel>
+        <html>
+          <h1>
+          Fetch request metrics
+          </h1>
+        </html>
+      </panel>
+    </row>
+    <row>
+      <panel>
+        <chart>
+          <title>Fetch requests size in bytes per topic</title>
+          <search>
+            <query>| mstats 
+    latest(kafka_consumer_consumer_fetch_manager_metrics.fetch-size-avg) as avg_value
+    latest(kafka_consumer_consumer_fetch_manager_metrics.fetch-size-max) as max_value
+  WHERE "index"="telegraf_metrics" client-id=$client-id$ topic=$topic$ span=1m 
+  | timechart avg(avg_value) as avg_value avg(max_value) as max_value span=1m</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Bytes</option>
+          <option name="charting.axisTitleY2.text">Records</option>
+          <option name="charting.axisY.abbreviation">none</option>
+          <option name="charting.axisY2.enabled">1</option>
+          <option name="charting.axisY2.scale">linear</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.chart.nullValueMode">zero</option>
+          <option name="charting.chart.overlayFields">"Fetch size Records"</option>
+          <option name="charting.chart.showDataLabels">none</option>
+          <option name="charting.drilldown">none</option>
+          <option name="charting.layout.splitSeries">0</option>
+          <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+          <option name="charting.legend.placement">top</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+      <panel>
+        <chart>
+          <title>Fetch request size in number of messages per topic</title>
+          <search>
+            <query>| mstats 
+    latest(kafka_consumer_consumer_fetch_manager_metrics.records-per-request-avg) as value
+  WHERE "index"="telegraf_metrics" client-id=$client-id$ topic=$topic$ span=1m 
+  | timechart avg(value) span=1m</query>
+            <earliest>$timerange.earliest$</earliest>
+            <latest>$timerange.latest$</latest>
+          </search>
+          <option name="charting.axisTitleX.visibility">collapsed</option>
+          <option name="charting.axisTitleY.text">Messages</option>
+          <option name="charting.axisTitleY2.text">Records</option>
+          <option name="charting.axisY.abbreviation">none</option>
+          <option name="charting.axisY2.enabled">1</option>
+          <option name="charting.axisY2.scale">linear</option>
+          <option name="charting.chart">line</option>
+          <option name="charting.chart.nullValueMode">zero</option>
+          <option name="charting.chart.overlayFields">"Fetch size Records"</option>
+          <option name="charting.chart.showDataLabels">none</option>
+          <option name="charting.drilldown">none</option>
+          <option name="charting.layout.splitSeries">0</option>
+          <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+          <option name="charting.legend.placement">top</option>
+          <option name="refresh.display">progressbar</option>
+        </chart>
+      </panel>
+    </row>
+  </form>

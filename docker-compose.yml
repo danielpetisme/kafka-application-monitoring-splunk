@@ -63,6 +63,9 @@ services:
     volumes:
       - "./splunk/update_splunk_hec_token.yml:/opt/ansible/update_splunk_hec_token.yml"
       - "./splunk/telegraf-kafka-kafka-stream.xml:/opt/splunk/etc/apps/search/local/data/ui/views/telegraf-kafka-kafka-stream.xml"
+      - "./splunk/telegraf-kafka-producer.xml:/opt/splunk/etc/apps/search/local/data/ui/views/telegraf-kafka-producer.xml"
+      - "./splunk/telegraf-kafka-consumer.xml:/opt/splunk/etc/apps/search/local/data/ui/views/telegraf-kafka-consumer.xml"
+      - "./splunk/telegraf-kafka-consumer-topic-details.xml:/opt/splunk/etc/apps/search/local/data/ui/views/telegraf-kafka-consumer-topic-details.xml"
       - opt-splunk-etc:/opt/splunk/etc
       - opt-splunk-var:/opt/splunk/var
     ports:
