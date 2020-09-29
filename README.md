@@ -10,7 +10,7 @@ To start the environment simply run the following command
 ```
 docker-compose up -d
 ```
-Go to http://localhost:8000/en-US/app/search/telegraf-kafka-kafka-stream (Splunk). Login/password is admin/changeme.
+Go to http://localhost:8000/fr-FR/app/search/dashboards (Splunk). Login/password is admin/changeme.
 
 ## Build local images
 This repository contains some local docker images including :
@@ -101,6 +101,15 @@ Note: To access to all Kafka Metrics, you may need to change the `metrics.record
 A dummy consumer logging the details of every new record coming from `machine-1m-production-performance`.
 
 # Dashboards
+## Kafka Producer
+![Kafka Producer](./images/kafka-producer-monitoring.png)
+
+## Kafka Consumer
+![Kafka Consumer](./images/kafka-kafka-consumer-monitoring.png)
+
+## Kafka Consumer topic details
+![Kafka Consumer Topic Details](./images/kafka-consumer-topic-details-monitoring.png)
+
 ## Kafka Stream
 ![Kafka Stream](./images/kafka-stream-monitoring.png)
 
