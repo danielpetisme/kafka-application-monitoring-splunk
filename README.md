@@ -105,7 +105,7 @@ A dummy consumer logging the details of every new record coming from `machine-1m
 ![Kafka Producer](./images/kafka-producer-monitoring.png)
 
 ## Kafka Consumer
-![Kafka Consumer](./images/kafka-kafka-consumer-monitoring.png)
+![Kafka Consumer](./images/kafka-consumer-monitoring.png)
 
 ## Kafka Consumer topic details
 ![Kafka Consumer Topic Details](./images/kafka-consumer-topic-details-monitoring.png)
